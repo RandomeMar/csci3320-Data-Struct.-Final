@@ -1,3 +1,6 @@
+from bs4 import BeautifulSoup
+from urllib.request import urlopen
+
 
 class Webpage:
     def __init__(self, url, adj=None):
@@ -66,6 +69,20 @@ class Graph:
             print(f"{vert.url}: {vert.adj}")
         print()
         return self
+    
+def main():
+    url = "https://nytimes.com"
+    page = urlopen(url)
+    html = page.read().decode("utf-8")
+    soup = BeautifulSoup(html, "html.parser")
+    articles = soup.find_all("section", class_="story-wrapper")
+    for article in articles:
+        title = article.find("p", class_="indicate-hover")
+        if title: print(title.get_text())
+
+
+if __name__ == "__main__":
+    main()
 
 temp = {
     "Google.com": ["Youtube.com", "Reddit.com", "Facebook.com"],
