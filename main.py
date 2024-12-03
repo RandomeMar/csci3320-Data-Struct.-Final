@@ -71,14 +71,11 @@ class Graph:
         return self
     
 def main():
-    url = "https://nytimes.com"
+    url = "https://en.wikipedia.org/wiki/Dog"
     page = urlopen(url)
     html = page.read().decode("utf-8")
     soup = BeautifulSoup(html, "html.parser")
-    articles = soup.find_all("section", class_="story-wrapper")
-    for article in articles:
-        title = article.find("p", class_="indicate-hover")
-        if title: print(title.get_text())
+    print(soup)
 
 
 if __name__ == "__main__":
