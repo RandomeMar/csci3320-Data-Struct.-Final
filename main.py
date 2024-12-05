@@ -1,6 +1,9 @@
 from bs4 import BeautifulSoup
 from urllib.request import urlopen
+import re
+from QforBFS import QforBFS
 
+# NEED TO ADD PROPER QUEUE IMPLEMENTATION
 
 class Webpage:
     def __init__(self, url, adj=None):
@@ -12,7 +15,6 @@ class Graph:
         self.g_dict = {}
 
         if i_dict:
-            print("CALLED")
             for url in i_dict:
                 self.g_dict[url] = Webpage(url, adj=i_dict[url])
 
@@ -22,9 +24,8 @@ class Graph:
         return self
     
     def add_edge(self, url1, url2):
-        if url1 not in self.g_dict or url2 not in self.g_dict: return self
+        if url1 not in self.g_dict: return self
         self.g_dict[url1].adj.append(url2)
-        self.g_dict[url2].adj.append(url1)
         return self
     
     def del_vertex(self, url):
@@ -39,10 +40,8 @@ class Graph:
         return self
 
     def del_edge(self, url1, url2):
-        if url1 not in self.g_dict or url2 not in self.g_dict: 
-            return self
+        if url1 not in self.g_dict: return self
         self.g_dict[url1].adj.remove(url2)
-        self.g_dict[url2].adj.remove(url1)
         return self
     
     def BFS(self, start):
@@ -71,19 +70,28 @@ class Graph:
         return self
     
 def main():
-    url = "https://nytimes.com"
+    url = "https://en.wikipedia.org/wiki/Pirkl"
     page = urlopen(url)
     html = page.read().decode("utf-8")
     soup = BeautifulSoup(html, "html.parser")
-    articles = soup.find_all("section", class_="story-wrapper")
-    for article in articles:
-        title = article.find("p", class_="indicate-hover")
-        if title: print(title.get_text())
+    contents = soup.find("div", class_="mw-content-ltr mw-parser-output")
+
+    queue = QforBFS()
+    pages = Graph()
+    pages.add_vertex(url)
+    for link in contents.find_all('a', href=re.compile(r"/wiki/.*")):
+        new_url = link["href"].replace("/wiki/", "", 1)
+        if new_url in pages.g_dict[url].adj:
+            continue
+        pages.add_edge(url, new_url)
+    pages.print_adj()
+    
 
 
 if __name__ == "__main__":
     main()
 
+# This is just for testing
 temp = {
     "Google.com": ["Youtube.com", "Reddit.com", "Facebook.com"],
     "Youtube.com": ["Google.com", "Youtube.kids"],
@@ -94,8 +102,8 @@ temp = {
     "Facebook.com/marketplace": ["Facebook.com"]
 }
 
-graph = Graph(i_dict=temp)
+#graph = Graph(i_dict=temp)
 
-graph.print_adj()
-print()
-graph.BFS("Google.com")
+#graph.print_adj()
+#print()
+#graph.BFS("Google.com")
